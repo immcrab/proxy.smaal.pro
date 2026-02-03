@@ -3,130 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmaalWeb | Stealth Ultra</title>
+    <title>SmaalWEB | By Owen Lee</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #05000a;
-            --accent: #bc13fe;
-            --text: #f0e6ff;
-            --border: rgba(188, 19, 254, 0.2);
+        :root { --bg: #05000a; --accent: #bc13fe; --text: #f0e6ff; --border: rgba(188, 19, 254, 0.2); --warning: #ff3333; --success: #00ff41; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; overflow: hidden; }
+        
+        #header {
+            background: #000; border-bottom: 1px solid var(--border);
+            padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 50px;
         }
-
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            background: var(--bg); color: var(--text); 
-            font-family: 'Outfit', sans-serif; overflow: hidden; 
-        }
-
-        #header { 
-            background: #000; border-bottom: 1px solid var(--border); 
-            padding: 10px 15px; display: flex; align-items: center; gap: 10px;
-        }
-
+        
         input {
-            flex: 1; background: #0a0015; border: 1px solid #331144;
-            color: var(--accent); padding: 10px; font-family: 'Fira Code', monospace; 
-            outline: none; border-radius: 4px;
+            flex: 1; background: #0a0015; border: 1px solid #331144; color: var(--accent);
+            padding: 10px; font-family: 'Fira Code', monospace; outline: none; border-radius: 4px;
         }
-
+        
         button {
             background: transparent; border: 1px solid var(--accent); color: var(--accent);
-            padding: 8px 16px; cursor: pointer; font-family: 'Fira Code'; 
-            border-radius: 4px; transition: 0.2s;
+            padding: 8px 16px; cursor: pointer; font-family: 'Fira Code'; border-radius: 4px; transition: 0.2s;
         }
         button:hover { background: var(--accent); color: white; }
 
+        #viewport { height: calc(100vh - 50px); width: 100%; position: relative; background: #fff; }
+        iframe { width: 100%; height: 100%; border: none; }
+
         #loader {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999; display: none;
+            background: #05000a; z-index: 9999; display: none;
             flex-direction: column; align-items: center; justify-content: center;
         }
-        .term-box { width: 400px; padding: 20px; border-left: 2px solid var(--accent); background: #000; }
-        .line { font-family: 'Fira Code'; font-size: 13px; color: var(--accent); margin-bottom: 5px; }
+        .term-box { 
+            width: 85%; max-width: 700px; height: 400px; 
+            padding: 20px; border: 1px solid var(--border); 
+            background: #000; overflow-y: scroll;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 1);
+            scrollbar-width: none;
+        }
+        .term-box::-webkit-scrollbar { display: none; }
 
-        #viewport { flex: 1; height: calc(100vh - 65px); position: relative; }
-        iframe { width: 100%; height: 100%; border: none; background: #fff; }
+        .line { font-family: 'Fira Code'; font-size: 13px; color: var(--accent); margin-bottom: 4px; line-height: 1.2; }
+        .pkg { color: #888; }
+        .version { color: var(--success); }
+        .progress { color: #fff; }
+        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--accent); animation: blink 0.8s infinite; }
+        
+        #warningBox {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 340px; background: #1a0000; border: 2px solid var(--warning); padding: 25px;
+            text-align: center; z-index: 10000; box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
+        }
+        #warningBox h3 { color: var(--warning); margin: 0 0 10px 0; font-family: 'Fira Code'; }
+        #warningBox p { font-size: 14px; color: #ffcccc; margin-bottom: 20px; }
+        .btn-warning { border-color: var(--warning); color: var(--warning); font-weight: bold; }
+        .btn-warning:hover { background: var(--warning); color: #fff; }
 
-        .home { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #1a0530 0%, #05000a 100%); }
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        .card { padding: 25px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); cursor: pointer; text-align: center; border-radius: 6px; width: 180px; }
-        .card:hover { border-color: var(--accent); background: rgba(188, 19, 254, 0.1); transform: scale(1.03); }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .home {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; background: radial-gradient(circle, #1a0530 0%, #05000a 100%);
+            z-index: 10;
+        }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .card { padding: 15px 30px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); cursor: pointer; border-radius: 4px; text-align: center; }
+        .card:hover { border-color: var(--accent); background: rgba(188, 19, 254, 0.1); }
     </style>
 </head>
 <body>
 
 <div id="header">
-    <button onclick="goHome()">HOME</button>
-    <input type="text" id="urlInput" placeholder="root@stealth:~# enter url..." onkeydown="if(event.key==='Enter') handleSurf()">
-    <button onclick="handleSurf()">EXECUTE</button>
+    <button onclick="goHome()">Home</button>
+    <button onclick="goBack()">Back</button>
+    <input type="text" id="urlInput" placeholder="Secure search..." onkeydown="if(event.key==='Enter') handleSurf()">
+    <button onclick="handleSurf()">Go</button>
 </div>
 
 <div id="viewport">
     <div id="loader">
         <div class="term-box" id="termLog"></div>
-    </div>
-    <div id="content" style="height: 100%;">
-        <div class="home">
-            <h1 style="color:var(--accent); font-family:'Fira Code'; letter-spacing: 4px;">STEALTH_ENV_V4</h1>
-            <div class="grid">
-                <div class="card" onclick="launch('google.com')">GOOGLE</div>
-                <div class="card" onclick="launch('poki.com')">POKI</div>
-                <div class="card" onclick="launch('crazygames.com')">CRAZY_GAMES</div>
-                <div class="card" onclick="launch('youtube.com')">YOUTUBE</div>
-            </div>
-            <p id="statusLine" style="font-size: 10px; margin-top: 20px; color: #555;">Status: Nodes Active | API: smaalweb-api.workers.dev</p>
+        <div id="warningBox">
+            <h3>network complication</h3>
+            <p>like a lotta ppl are on here rn, do you still wanna go? js so yk, it WILL be a little laggy.</p>
+            <button class="btn-warning" id="proceedBtn">sure, lets go</button>
         </div>
     </div>
+
+    <div id="homeScreen" class="home">
+        <h1 style="color:var(--accent); font-family:'Fira Code'; letter-spacing: 5px;">SmaalWEB | By Owen Lee</h1>
+        <div class="grid">
+            <div class="card" onclick="launch('google.com')">Google</div>
+            <div class="card" onclick="launch('itch.io')">Itch.io</div>
+            <div class="card" onclick="launch('poki.com')">Poki</div>
+            <div class="card" onclick="launch('crazygames.com')">Crazy Games</div>
+            <div class="card" onclick="launch('unblocked-games.s3.amazonaws.com/index.html')">FreezeNova Unblocked</div>
+            <div class="card" onclick="launch('freezenova.com')">FrezeNova</div>
+            <div class="card" onclick="launch('d3tecwpbnz01jy.cloudfront.net')">FreezeNova.cloud</div>
+            <div class="card" onclick="launch('quiz-90.live')">Quiz-90.live</div>
+        </div>
+    </div>
+
+    <iframe id="proxyFrame" src="about:blank" style="display:none;"></iframe>
 </div>
 
 <script>
     const API_ENDPOINT = "https://smaalweb-api.imcrabfr.workers.dev/?url=";
+    
+    const packages = [
+        { name: "smaal-lib", v: "4.2.1" },
+        { name: "pr-niche", v: "1.0" },
+        { name: "temp-user-pkg", v: "8.4.0" },
+        { name: "workers-dev-smaalweb", v: "2.1.3" },
+        { name: "smaal-code-dycripter", v: "5.0.1" },
+        { name: "html-js-games", v: "games-download" },
+        { name: "js-deobfuscator", v: "1.9.0" }
+    ];
 
-    async function launch(url) {
-        if(!url) return;
+    async function launch(input) {
+        if(!input) return;
         const loader = document.getElementById('loader');
+        const frame = document.getElementById('proxyFrame');
+        const home = document.getElementById('homeScreen');
         const log = document.getElementById('termLog');
-        const content = document.getElementById('content');
+        const warning = document.getElementById('warningBox');
         
-        // Ensure URL is valid
-        let targetUrl = url.trim();
-        if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
+        let targetUrl = input.trim();
+        const isUrl = targetUrl.includes('.') && !targetUrl.includes(' ');
+        if (!isUrl) targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(targetUrl);
+        else if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
 
         loader.style.display = 'flex';
-        log.innerHTML = '';
+        warning.style.display = 'none';
+        log.style.opacity = '1';
+        log.innerHTML = `<div class="line">SmaalWEB PKG Downloads [v6.3.7-okay-stability]</div><div class="line">asking for the deatail stuff...</div>`;
         
-        const lines = [
-            `> CONNECTING TO CLOUD_WORKER...`,
-            `> PROXYING: ${targetUrl.toUpperCase()}`,
-            `> REMOVING X-FRAME RESTRICTIONS...`,
-            `> HANDSHAKE COMPLETE.`
-        ];
+        // SLOW START: Waiting for server
+        await sleep(1500);
 
-        for (let t of lines) {
-            let d = document.createElement('div');
-            d.className = 'line';
-            d.textContent = t;
-            log.appendChild(d);
-            await new Promise(r => setTimeout(r, 100));
+        // FAST BURST: Installing dependencies
+        for (let pkg of packages) {
+            log.innerHTML += `<div class="line"><span class="pkg">FOD</span> ${pkg.name} <span class="version">v${pkg.v}</span>...</div>`;
+            log.scrollTop = log.scrollHeight;
+            
+            // Progress bars move at different speeds
+            const speed = Math.random() > 0.5 ? 30 : 150; 
+            const progLine = document.createElement('div');
+            progLine.className = 'line progress';
+            log.appendChild(progLine);
+            
+            for(let i=0; i<=10; i++) {
+                progLine.innerHTML = `[${'#'.repeat(i)}${'.'.repeat(10-i)}] ${i*10}%`;
+                log.scrollTop = log.scrollHeight;
+                await sleep(speed); 
+            }
+            progLine.innerHTML += ` downloaded`;
         }
 
-        // The magic happens here: we encode the URL so the Worker can read it correctly
-        const proxyUrl = API_ENDPOINT + encodeURIComponent(targetUrl);
-        content.innerHTML = `<iframe src="${proxyUrl}"></iframe>`;
-        
-        setTimeout(() => { 
-            loader.style.display = 'none'; 
-        }, 500);
+        // SLOW DOWN: Finalizing and Security Checks
+        log.innerHTML += `<br><div class="line">Downloading SLL integregations...</div>`;
+        log.scrollTop = log.scrollHeight;
+        await sleep(1200);
+
+        // RANDOM WARNING
+        if (Math.random() < 0.35) {
+            log.style.opacity = '0.2';
+            warning.style.display = 'block';
+            await new Promise(res => {
+                document.getElementById('proceedBtn').onclick = () => {
+                    warning.style.display = 'none';
+                    log.style.opacity = '1';
+                    res();
+                };
+            });
+            log.innerHTML += `<div class="line" style="color:var(--warning)">> our servers run on CloudFlare workers.dev, we may have ran out of searches for today. if not, a lotta ppl on ts rn.</div>`;
+        }
+
+        log.innerHTML += `<div class="line">working on it, give us a sec pls🙏. getting link: ${targetUrl} (rlly, why this one?)</div>`;
+        log.scrollTop = log.scrollHeight;
+        await sleep(2000); // The "Big Wait"
+
+        log.innerHTML += `<div class="line" style="color:var(--success)">> Connected! <span class="cursor"></span></div>`;
+        log.scrollTop = log.scrollHeight;
+        await sleep(500);
+
+        // Launch
+        frame.src = API_ENDPOINT + encodeURIComponent(targetUrl);
+        frame.style.display = 'block';
+        home.style.display = 'none';
+        loader.style.display = 'none';
     }
 
-    function handleSurf() {
-        launch(document.getElementById('urlInput').value);
-    }
-
-    function goHome() {
-        location.reload();
-    }
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+    function handleSurf() { launch(document.getElementById('urlInput').value); }
+    function goHome() { location.reload(); }
+    function goBack() { document.getElementById('proxyFrame').contentWindow.history.back(); }
 </script>
 </body>
 </html>
