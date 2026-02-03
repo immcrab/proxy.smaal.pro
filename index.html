@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmaalWeb Proxy</title>
+    <title>New Tab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0a;
-            --nav: #151515;
-            --accent: #007bff;
-            --text: #ffffff;
-            --card: #1e1e1e;
-            --tab-inactive: #111;
+            --bg: #050505;
+            --panel: rgba(10, 10, 10, 0.95);
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.3);
+            --text: #e0e0e0;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
         }
 
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Outfit', sans-serif;
             background: var(--bg);
             color: var(--text);
             display: flex;
@@ -25,248 +27,317 @@
             overflow: hidden;
         }
 
-        /* Fixed UI Components - These will NEVER be overwritten */
+        /* --- UI Wrapper --- */
         #ui-wrapper {
+            background: var(--panel);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 15px;
             display: flex;
             flex-direction: column;
-            z-index: 9999; /* Keeps UI on top */
-            background: var(--bg);
+            gap: 10px;
+            z-index: 1000;
         }
 
         #tab-bar {
             display: flex;
-            background: #000;
-            padding: 5px 5px 0 5px;
-            gap: 4px;
-            height: 40px;
-            align-items: flex-end;
-            border-bottom: 1px solid #222;
+            gap: 8px;
+            align-items: center;
+            overflow-x: auto;
+            scrollbar-width: none;
         }
 
         .tab {
-            padding: 8px 16px;
-            background: var(--tab-inactive);
-            border-radius: 8px 8px 0 0;
+            background: var(--glass);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 13px;
             cursor: pointer;
-            min-width: 100px;
-            font-size: 12px;
-            color: #888;
-            border: 1px solid #222;
-            border-bottom: none;
+            border: 1px solid var(--border);
             display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+            min-width: 100px;
+            max-width: 180px;
             justify-content: space-between;
+            color: #888;
         }
 
         .tab.active {
-            background: var(--nav);
+            background: rgba(0, 242, 255, 0.1);
+            border-color: var(--accent);
             color: var(--accent);
-            border-top: 2px solid var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        #nav {
-            padding: 10px;
-            background: var(--nav);
-            display: flex;
-            gap: 10px;
-            border-bottom: 1px solid #222;
+        .add-tab {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--accent);
+            padding: 0 10px;
+            line-height: 1;
         }
 
+        /* --- Navigation --- */
+        #nav { display: flex; gap: 10px; }
+        
         input {
             flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            background: #0a0a0a;
+            padding: 10px 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.4);
             color: white;
             outline: none;
+            font-family: inherit;
         }
 
-        button#surfBtn {
+        button {
             background: var(--accent);
-            color: white;
+            color: #000;
             border: none;
-            padding: 0 20px;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 0 15px;
+            border-radius: 12px;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.2s;
         }
 
-        /* Viewport Logic */
-        #viewer-container {
-            flex: 1;
-            background: #fff;
-            position: relative;
-            overflow: hidden; 
-        }
-
-        .tab-content {
-            width: 100%;
-            height: 100%;
-            display: none;
-            overflow: auto; /* Allow the proxied site to scroll internally */
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Home Screen Styles */
+        /* --- Home Screen --- */
         .home-screen {
-            background: var(--bg);
+            position: relative;
+            background: #000;
             height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
-        .prefabs {
+        .bg-animate {
+            position: absolute;
+            width: 200%; height: 200%;
+            background-image: 
+                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: perspective(500px) rotateX(60deg) translateY(-20%);
+            animation: moveGrid 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        .home-content { position: relative; z-index: 2; text-align: center; width: 90%; max-width: 800px; }
+
+        .grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
-            margin-top: 30px;
-            width: 90%;
-            max-width: 700px;
+            margin-top: 40px;
         }
 
         .card {
-            background: var(--card);
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(15, 15, 15, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            padding: 18px;
+            border-radius: 18px;
             cursor: pointer;
-            border: 1px solid #333;
-            text-align: center;
+            transition: 0.3s;
         }
 
-        .card:hover { border-color: var(--accent); background: #222; }
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            background: rgba(25, 25, 25, 0.9);
+        }
+
+        #viewer-container { flex: 1; position: relative; background: #fff; }
+        .tab-content { width: 100%; height: 100%; display: none; overflow: auto; }
+        .tab-content.active { display: block; }
+
+        /* Force Dark Mode via Filter */
+        .dark-mode-filter {
+            filter: invert(1) hue-rotate(180deg);
+        }
+        
+        /* Prevent images from being inverted back so they look normal */
+        .dark-mode-filter img, .dark-mode-filter video, .dark-mode-filter iframe {
+            filter: invert(1) hue-rotate(180deg);
+        }
+
+        .loader {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--accent);
+            display: none;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
 
     <div id="ui-wrapper">
         <div id="tab-bar">
-            <div id="new-tab-btn" onclick="createNewTab()" style="padding: 10px; color: var(--accent); cursor:pointer;">+</div>
+            <div class="add-tab" onclick="createNewTab()">+</div>
         </div>
-
         <div id="nav">
-            <input type="text" id="urlInput" placeholder="Enter URL...">
-            <button id="surfBtn" onclick="handleSurf()">Surf</button>
+            <input type="text" id="urlInput" placeholder="Search or type URL...">
+            <button onclick="toggleDarkMode()" style="background: #333; color: white;">🌙 Dark</button>
+            <button onclick="handleSurf()">Surf</button>
         </div>
     </div>
 
-    <div id="viewer-container"></div>
+    <div id="viewer-container">
+        <div class="loader" id="mainLoader">Loading...</div>
+    </div>
 
     <script>
-    let tabs = [];
-    let activeTabId = null;
-    // Fast reliable proxy base
-    const proxyBase = "https://corsproxy.io/?"; 
+        let tabs = [];
+        let activeTabId = null;
+        let forceDarkMode = true; // Default to true
+        const proxyBase = "https://corsproxy.io/?";
 
-    const homeHTML = `
-        <div class="home-screen">
-            <h1 style="font-size: 4rem; margin: 0;">Smaal<span style="color:var(--accent)">Web</span></h1>
-            <div class="prefabs">
-                <div class="card" onclick="quickLaunch('google.com')"><b>Google</b></div>
-                <div class="card" onclick="quickLaunch('youtube.com')"><b>YouTube</b></div>
-                <div class="card" onclick="quickLaunch('ballsack.gmsgroup.app')"><b>GMS Group</b></div>
-                <div class="card" onclick="quickLaunch('discord.com')"><b>Discord</b></div>
-                <div class="card" onclick="quickLaunch('github.com')"><b>GitHub</b></div>
-                <div class="card" onclick="quickLaunch('wikipedia.org')"><b>Wikipedia</b></div>
-                <div class="card" onclick="quickLaunch('unblocked-games.s3.amazonaws.com/index.html')"><b>Unblocked Games</b></div>
-            </div>
-        </div>
-    `;
+        function createNewTab() {
+            const id = Date.now();
+            tabs.push({ id, url: "", isDark: forceDarkMode });
 
-    function createNewTab() {
-        const id = Date.now();
-        tabs.push({ id, url: "" });
-        const tabEl = document.createElement('div');
-        tabEl.className = 'tab';
-        tabEl.id = `tab-${id}`;
-        tabEl.innerHTML = `<span class="title">Home</span><span class="close-x" onclick="closeTab(event, ${id})">×</span>`;
-        tabEl.onclick = () => switchTab(id);
-        document.getElementById('tab-bar').insertBefore(tabEl, document.getElementById('new-tab-btn'));
-        const contentEl = document.createElement('div');
-        contentEl.className = 'tab-content';
-        contentEl.id = `content-${id}`;
-        contentEl.innerHTML = homeHTML;
-        document.getElementById('viewer-container').appendChild(contentEl);
-        switchTab(id);
-    }
+            const tabEl = document.createElement('div');
+            tabEl.className = 'tab';
+            tabEl.id = `tab-${id}`;
+            tabEl.innerHTML = `<span class="t-title">New Tab</span><span onclick="closeTab(event, ${id})">×</span>`;
+            tabEl.onclick = () => switchTab(id);
+            document.getElementById('tab-bar').insertBefore(tabEl, document.querySelector('.add-tab'));
 
-    async function launch(target, id) {
-    if (!target) return;
-    
-    // Check if the input is a URL or a search phrase
-    const isUrl = target.includes('.') && !target.includes(' ');
-    
-    if (isUrl) {
-        if (!target.startsWith('http')) target = 'https://' + target;
-    } else {
-        // It's a search phrase! Send it to DuckDuckGo
-        target = `https://duckduckgo.com/?q=${encodeURIComponent(target)}`;
-    }
+            const contentEl = document.createElement('div');
+            contentEl.className = 'tab-content';
+            contentEl.id = `content-${id}`;
+            contentEl.innerHTML = `
+                <div class="home-screen">
+                    <div class="bg-animate"></div>
+                    <div class="home-content">
+                        <h1>SMAAL<span style="color:var(--accent)">WEB</span></h1>
+                        <div class="grid">
+                            <div class="card" onclick="quickLaunch('coolmathgames.com')"><b>CoolMath</b></div>
+                            <div class="card" onclick="quickLaunch('poki.com')"><b>Poki</b></div>
+                            <div class="card" onclick="quickLaunch('crazygames.com')"><b>CrazyGames</b></div>
+                            <div class="card" onclick="quickLaunch('now.gg')"><b>Now.gg</b></div>
+                            <div class="card" onclick="quickLaunch('github.com/3kh0/3kh0-assets')"><b>3kh0</b></div>
+                            <div class="card" onclick="quickLaunch('google.com')"><b>Google</b></div>
+                        </div>
+                    </div>
+                </div>`;
+            document.getElementById('viewer-container').appendChild(contentEl);
+            switchTab(id);
+        }
 
-    const currentTab = tabs.find(t => t.id === id);
-    currentTab.url = target;
-    const container = document.getElementById(`content-${id}`);
-    container.innerHTML = `<div style="padding:20px; color:#333; background:white; height:100%;">🚀 Surfing to ${target}...</div>`;
+        async function launch(target, id) {
+            if (!target) return;
+            document.getElementById('mainLoader').style.display = 'block';
 
-    try {
-        const response = await fetch(proxyBase + encodeURIComponent(target));
-        const html = await response.text();
-        const urlObj = new URL(target);
-        const base = urlObj.origin;
+            let finalUrl = target;
+            if (!target.includes('.') || target.includes(' ')) {
+                finalUrl = `https://duckduckgo.com/?q=${encodeURIComponent(target)}`;
+            } else if (!target.startsWith('http')) {
+                finalUrl = 'https://' + target;
+            }
 
-        let rewritten = html.replace(/(src|href|action)="(?!http|data|#|javascript)([^"]+)"/g, (m, attr, path) => {
-            return `${attr}="${path.startsWith('/') ? base + path : base + '/' + path}"`;
-        }).replace(/url\(['"]?(?!http|data|#)([^'"]+)['"]?\)/g, (m, path) => {
-            return `url("${path.startsWith('/') ? base + path : base + '/' + path}")`;
-        });
+            const currentTab = tabs.find(t => t.id === id);
+            currentTab.url = finalUrl;
+            if(id === activeTabId) document.getElementById('urlInput').value = finalUrl;
 
-        const baseTag = `<base href="${base}/">`;
-        let shadow = container.shadowRoot || container.attachShadow({mode: 'open'});
-        shadow.innerHTML = `<style>body{background:white; color:black; margin:0;}</style>` + baseTag + rewritten;
-        
-        document.getElementById(`tab-${id}`).querySelector('.title').innerText = urlObj.hostname;
+            try {
+                const response = await fetch(proxyBase + encodeURIComponent(finalUrl));
+                const html = await response.text();
+                const urlObj = new URL(finalUrl);
+                const base = urlObj.origin;
 
-        shadow.querySelectorAll('a').forEach(link => {
-            link.onclick = (e) => {
-                const href = link.getAttribute('href');
-                if (href && !href.startsWith('#')) {
-                    e.preventDefault();
-                    document.getElementById('urlInput').value = link.href;
-                    launch(link.href, id);
+                let rewritten = html.replace(/(src|href|action|integrity|nonce)="([^"]+)"/g, (m, attr, path) => {
+                    if (attr === 'integrity' || attr === 'nonce') return ''; 
+                    if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('#')) return m;
+                    return `${attr}="${path.startsWith('/') ? base + path : base + '/' + path}"`;
+                });
+
+                const container = document.getElementById(`content-${id}`);
+                let shadow = container.shadowRoot || container.attachShadow({mode: 'open'});
+                
+                // Inject the dark mode class if enabled
+                const dmClass = currentTab.isDark ? 'class="dark-mode-filter"' : '';
+                
+                shadow.innerHTML = `
+                <style>
+                    :host { display: block; height: 100%; }
+                    body { background: white; color: black; margin: 0; font-family: sans-serif; }
+                    .dark-mode-filter { filter: invert(1) hue-rotate(180deg); background: #fff; }
+                    .dark-mode-filter img, .dark-mode-filter video { filter: invert(1) hue-rotate(180deg); }
+                </style>
+                <div id="proxy-body" ${dmClass}>
+                    <base href="${base}/">
+                    ${rewritten}
+                </div>`;
+
+                shadow.querySelectorAll('a').forEach(link => {
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        launch(link.href, id);
+                    };
+                });
+
+                document.getElementById(`tab-${id}`).querySelector('.t-title').innerText = urlObj.hostname;
+            } catch (err) {
+                console.log("Fetch failed.");
+            } finally {
+                document.getElementById('mainLoader').style.display = 'none';
+            }
+        }
+
+        function toggleDarkMode() {
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            currentTab.isDark = !currentTab.isDark;
+            // Re-render the current view to apply filter
+            if (currentTab.url) {
+                const container = document.getElementById(`content-${activeTabId}`);
+                if (container.shadowRoot) {
+                    const body = container.shadowRoot.getElementById('proxy-body');
+                    if (currentTab.isDark) body.classList.add('dark-mode-filter');
+                    else body.classList.remove('dark-mode-filter');
                 }
-            };
+            }
+        }
+
+        function switchTab(id) {
+            activeTabId = id;
+            document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${id}`).classList.add('active');
+            document.getElementById(`content-${id}`).classList.add('active');
+            const tab = tabs.find(t => t.id === id);
+            document.getElementById('urlInput').value = tab.url || "";
+        }
+
+        function handleSurf() { launch(document.getElementById('urlInput').value, activeTabId); }
+        function quickLaunch(url) { launch(url, activeTabId); }
+
+        function closeTab(e, id) {
+            e.stopPropagation();
+            document.getElementById(`tab-${id}`).remove();
+            document.getElementById(`content-${id}`).remove();
+            tabs = tabs.filter(t => t.id !== id);
+            if (tabs.length > 0) switchTab(tabs[0].id);
+            else createNewTab();
+        }
+
+        document.getElementById('urlInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSurf();
         });
-    } catch (e) { 
-        container.innerHTML = `<div style="color:red; padding:20px; background:white; height:100%;">Error loading: ${target}</div>`; 
-    }
-}
 
-function handleSurf() {
-    const input = document.getElementById('urlInput').value.trim();
-    if (input) {
-        launch(input, activeTabId);
-    }
-}
-
-    function switchTab(id) {
-        activeTabId = id;
-        document.querySelectorAll('.tab, .tab-content').forEach(el => el.classList.remove('active'));
-        document.getElementById(`tab-${id}`).classList.add('active');
-        document.getElementById(`content-${id}`).classList.add('active');
-        const currentTab = tabs.find(t => t.id === id);
-        document.getElementById('urlInput').value = currentTab.url;
-    }
-
-    function quickLaunch(url) { launch(url, activeTabId); }
-    function handleSurf() { launch(document.getElementById('urlInput').value, activeTabId); }
-    function closeTab(e, id) { e.stopPropagation(); document.getElementById(`tab-${id}`).remove(); document.getElementById(`content-${id}`).remove(); tabs = tabs.filter(t => t.id !== id); if(tabs.length > 0) switchTab(tabs[0].id); else createNewTab(); }
-    
-    document.getElementById('urlInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSurf(); });
-    createNewTab();
-</script>
+        createNewTab();
+    </script>
 </body>
 </html>
