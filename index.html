@@ -9,63 +9,54 @@
         :root { --bg: #05000a; --accent: #bc13fe; --text: #f0e6ff; --border: rgba(188, 19, 254, 0.2); --warning: #ff3333; --success: #00ff41; }
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; overflow: hidden; }
         
-        #header {
-            background: #000; border-bottom: 1px solid var(--border);
-            padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 50px;
-        }
-        
-        input {
-            flex: 1; background: #0a0015; border: 1px solid #331144; color: var(--accent);
-            padding: 10px; font-family: 'Fira Code', monospace; outline: none; border-radius: 4px;
-        }
-        
-        button {
-            background: transparent; border: 1px solid var(--accent); color: var(--accent);
-            padding: 8px 16px; cursor: pointer; font-family: 'Fira Code'; border-radius: 4px; transition: 0.2s;
-        }
+        #header { background: #000; border-bottom: 1px solid var(--border); padding: 10px 15px; display: flex; align-items: center; gap: 10px; height: 50px; }
+        input { flex: 1; background: #0a0015; border: 1px solid #331144; color: var(--accent); padding: 10px; font-family: 'Fira Code', monospace; outline: none; border-radius: 4px; transition: 0.3s; }
+        button { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; cursor: pointer; font-family: 'Fira Code'; border-radius: 4px; transition: 0.2s; }
         button:hover { background: var(--accent); color: white; }
+
+        /* Bot Container and Bubble UNDER button */
+        #bot-container { position: relative; display: inline-block; }
+        .bot-bubble {
+            position: absolute; 
+            top: 135%; /* Positioned below the button */
+            left: 50%; 
+            transform: translateX(-50%) translateY(-10px);
+            background: #0a0015; 
+            border: 1px solid var(--success); 
+            color: var(--success);
+            padding: 6px 12px; 
+            font-size: 11px; 
+            white-space: nowrap; 
+            border-radius: 6px;
+            font-family: 'Fira Code', monospace; 
+            box-shadow: 0 5px 15px rgba(0, 255, 65, 0.15);
+            opacity: 0; 
+            transition: opacity 0.3s ease, transform 0.3s ease; 
+            pointer-events: none; 
+            z-index: 10002;
+        }
+        /* Arrow pointing UP towards the button */
+        .bot-bubble::after {
+            content: ''; 
+            position: absolute; 
+            bottom: 100%; 
+            left: 50%; 
+            margin-left: -5px;
+            border-width: 5px; 
+            border-style: solid; 
+            border-color: transparent transparent var(--success) transparent;
+        }
+        .show-bubble { opacity: 1; transform: translateX(-50%) translateY(0); }
+        #bot-launcher { border-color: var(--success); color: var(--success); }
 
         #viewport { height: calc(100vh - 50px); width: 100%; position: relative; background: #fff; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        #loader {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: #05000a; z-index: 9999; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
-        .term-box { 
-            width: 85%; max-width: 700px; height: 400px; 
-            padding: 20px; border: 1px solid var(--border); 
-            background: #000; overflow-y: scroll;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 1);
-            scrollbar-width: none;
-        }
-        .term-box::-webkit-scrollbar { display: none; }
-
-        .line { font-family: 'Fira Code'; font-size: 13px; color: var(--accent); margin-bottom: 4px; line-height: 1.2; }
-        .pkg { color: #888; }
-        .version { color: var(--success); }
-        .progress { color: #fff; }
-        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--accent); animation: blink 0.8s infinite; }
+        #loader { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #05000a; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .term-box { width: 85%; max-width: 700px; height: 400px; padding: 20px; border: 1px solid var(--border); background: #000; overflow-y: scroll; scrollbar-width: none; }
+        .line { font-family: 'Fira Code'; font-size: 13px; color: var(--accent); margin-bottom: 4px; }
         
-        #warningBox {
-            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 340px; background: #1a0000; border: 2px solid var(--warning); padding: 25px;
-            text-align: center; z-index: 10000; box-shadow: 0 0 50px rgba(255, 0, 0, 0.5);
-        }
-        #warningBox h3 { color: var(--warning); margin: 0 0 10px 0; font-family: 'Fira Code'; }
-        #warningBox p { font-size: 14px; color: #ffcccc; margin-bottom: 20px; }
-        .btn-warning { border-color: var(--warning); color: var(--warning); font-weight: bold; }
-        .btn-warning:hover { background: var(--warning); color: #fff; }
-
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        .home {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; background: radial-gradient(circle, #1a0530 0%, #05000a 100%);
-            z-index: 10;
-        }
+        .home { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, #1a0530 0%, #05000a 100%); z-index: 10; }
         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
         .card { padding: 15px 30px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); cursor: pointer; border-radius: 4px; text-align: center; }
         .card:hover { border-color: var(--accent); background: rgba(188, 19, 254, 0.1); }
@@ -76,125 +67,98 @@
 <div id="header">
     <button onclick="goHome()">Home</button>
     <button onclick="goBack()">Back</button>
+    
+    <div id="bot-container">
+        <div id="botBubble" class="bot-bubble">...</div>
+        <button id="bot-launcher" onclick="window.open('assistant.html', 'bot', 'width=450,height=650')">Open Bot</button>
+    </div>
+
     <input type="text" id="urlInput" placeholder="Secure search..." onkeydown="if(event.key==='Enter') handleSurf()">
     <button onclick="handleSurf()">Go</button>
 </div>
 
 <div id="viewport">
-    <div id="loader">
-        <div class="term-box" id="termLog"></div>
-        <div id="warningBox">
-            <h3>network complication</h3>
-            <p>like a lotta ppl are on here rn, do you still wanna go? js so yk, it WILL be a little laggy.</p>
-            <button class="btn-warning" id="proceedBtn">sure, lets go</button>
-        </div>
-    </div>
-
+    <div id="loader"><div class="term-box" id="termLog"></div></div>
     <div id="homeScreen" class="home">
-        <h1 style="color:var(--accent); font-family:'Fira Code'; letter-spacing: 5px;">SmaalWEB | By Owen Lee</h1>
+        <h1 style="color:var(--accent); font-family:'Fira Code'; letter-spacing: 5px;">SmaalWEB | Owen Lee</h1>
         <div class="grid">
             <div class="card" onclick="launch('google.com')">Google</div>
             <div class="card" onclick="launch('itch.io')">Itch.io</div>
             <div class="card" onclick="launch('poki.com')">Poki</div>
             <div class="card" onclick="launch('crazygames.com')">Crazy Games</div>
-            <div class="card" onclick="launch('unblocked-games.s3.amazonaws.com/index.html')">FreezeNova Unblocked</div>
-            <div class="card" onclick="launch('freezenova.com')">FrezeNova</div>
-            <div class="card" onclick="launch('d3tecwpbnz01jy.cloudfront.net')">FreezeNova.cloud</div>
+            <div class="card" onclick="launch('freezenova.com')">FreezeNova</div>
             <div class="card" onclick="launch('quiz-90.live')">Quiz-90.live</div>
         </div>
     </div>
-
     <iframe id="proxyFrame" src="about:blank" style="display:none;"></iframe>
 </div>
 
 <script>
     const API_ENDPOINT = "https://smaalweb-api.imcrabfr.workers.dev/?url=";
-    
-    const packages = [
-        { name: "smaal-lib", v: "4.2.1" },
-        { name: "pr-niche", v: "1.0" },
-        { name: "temp-user-pkg", v: "8.4.0" },
-        { name: "workers-dev-smaalweb", v: "2.1.3" },
-        { name: "smaal-code-dycripter", v: "5.0.1" },
-        { name: "html-js-games", v: "games-download" },
-        { name: "js-deobfuscator", v: "1.9.0" }
+
+    // --- AUTO-TYPER ---
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'autoFillUrl' && e.newValue) {
+            const targetUrl = e.newValue;
+            const input = document.getElementById('urlInput');
+            input.value = ""; input.focus();
+            let i = 0;
+            const typer = setInterval(() => {
+                input.value += targetUrl[i]; i++;
+                if (i >= targetUrl.length) {
+                    clearInterval(typer);
+                    setTimeout(() => launch(input.value), 500);
+                }
+            }, 70);
+        }
+    });
+
+    // --- FREQUENT BOT QUOTES (Under Button) ---
+    const botQuotes = [
+        "Owen, let's play.", "Ready to bypass?", "Checking the mirrors...", 
+        "Proxy looks stable.", "New games found!", "Waiting for command...", 
+        "Systems nominal.", "Try typing 'Poki'!", "Accessing game hubs...", "Slimy's online.",
+        "Still here!.", "ask me abt some games!.", "sadly ppl call me gay and shi :(.", "i like long walks on the beach.", "did u kno im named after a typo?",
+        "im nto a real ai tbh.", "owo whats this?", "beep boop.", "i can do the thing.", "press the button above me!", "im lonely :(", "owen trapped me in here, help🙏"
     ];
+
+    function triggerBotShout() {
+        const bubble = document.getElementById('botBubble');
+        bubble.innerText = "...";
+        bubble.classList.add('show-bubble');
+
+        setTimeout(() => {
+            bubble.innerText = botQuotes[Math.floor(Math.random() * botQuotes.length)];
+            setTimeout(() => {
+                bubble.classList.remove('show-bubble');
+                const nextDelay = Math.floor(Math.random() * 3000) + 5000;
+                setTimeout(triggerBotShout, nextDelay);
+            }, 3500);
+        }, 1000);
+    }
+
+    setTimeout(triggerBotShout, 3000);
 
     async function launch(input) {
         if(!input) return;
+        localStorage.removeItem('autoFillUrl');
         const loader = document.getElementById('loader');
         const frame = document.getElementById('proxyFrame');
         const home = document.getElementById('homeScreen');
         const log = document.getElementById('termLog');
-        const warning = document.getElementById('warningBox');
         
         let targetUrl = input.trim();
-        const isUrl = targetUrl.includes('.') && !targetUrl.includes(' ');
-        if (!isUrl) targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(targetUrl);
+        if (!targetUrl.includes('.')) targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(targetUrl);
         else if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
 
         loader.style.display = 'flex';
-        warning.style.display = 'none';
-        log.style.opacity = '1';
-        log.innerHTML = `<div class="line">SmaalWEB PKG Downloads [v6.3.7-okay-stability]</div><div class="line">asking for the deatail stuff...</div>`;
-        
-        // SLOW START: Waiting for server
-        await sleep(1500);
+        log.innerHTML = `<div class="line">> Establishing Smaal-Node Uplink...</div>`;
+        await new Promise(r => setTimeout(r, 800));
 
-        // FAST BURST: Installing dependencies
-        for (let pkg of packages) {
-            log.innerHTML += `<div class="line"><span class="pkg">FOD</span> ${pkg.name} <span class="version">v${pkg.v}</span>...</div>`;
-            log.scrollTop = log.scrollHeight;
-            
-            // Progress bars move at different speeds
-            const speed = Math.random() > 0.5 ? 30 : 150; 
-            const progLine = document.createElement('div');
-            progLine.className = 'line progress';
-            log.appendChild(progLine);
-            
-            for(let i=0; i<=10; i++) {
-                progLine.innerHTML = `[${'#'.repeat(i)}${'.'.repeat(10-i)}] ${i*10}%`;
-                log.scrollTop = log.scrollHeight;
-                await sleep(speed); 
-            }
-            progLine.innerHTML += ` downloaded`;
-        }
-
-        // SLOW DOWN: Finalizing and Security Checks
-        log.innerHTML += `<br><div class="line">Downloading SLL integregations...</div>`;
-        log.scrollTop = log.scrollHeight;
-        await sleep(1200);
-
-        // RANDOM WARNING
-        if (Math.random() < 0.35) {
-            log.style.opacity = '0.2';
-            warning.style.display = 'block';
-            await new Promise(res => {
-                document.getElementById('proceedBtn').onclick = () => {
-                    warning.style.display = 'none';
-                    log.style.opacity = '1';
-                    res();
-                };
-            });
-            log.innerHTML += `<div class="line" style="color:var(--warning)">> our servers run on CloudFlare workers.dev, we may have ran out of searches for today. if not, a lotta ppl on ts rn.</div>`;
-        }
-
-        log.innerHTML += `<div class="line">working on it, give us a sec pls🙏. getting link: ${targetUrl} (rlly, why this one?)</div>`;
-        log.scrollTop = log.scrollHeight;
-        await sleep(2000); // The "Big Wait"
-
-        log.innerHTML += `<div class="line" style="color:var(--success)">> Connected! <span class="cursor"></span></div>`;
-        log.scrollTop = log.scrollHeight;
-        await sleep(500);
-
-        // Launch
         frame.src = API_ENDPOINT + encodeURIComponent(targetUrl);
-        frame.style.display = 'block';
-        home.style.display = 'none';
-        loader.style.display = 'none';
+        frame.style.display = 'block'; home.style.display = 'none'; loader.style.display = 'none';
     }
 
-    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     function handleSurf() { launch(document.getElementById('urlInput').value); }
     function goHome() { location.reload(); }
     function goBack() { document.getElementById('proxyFrame').contentWindow.history.back(); }

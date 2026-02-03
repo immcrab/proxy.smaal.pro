@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Slimy Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #05000a; --accent: #bc13fe; --text: #f0e6ff; --border: rgba(188, 19, 254, 0.2); }
+        body { background: var(--bg); color: var(--text); font-family: 'Fira Code', monospace; margin: 0; padding: 20px; display: flex; flex-direction: column; height: 92vh; }
+        #chat-log { flex: 1; overflow-y: auto; border: 1px solid var(--border); padding: 15px; background: #000; margin-bottom: 10px; }
+        .bot { color: var(--accent); margin-bottom: 12px; line-height: 1.4; }
+        .user { color: #fff; opacity: 0.6; margin-bottom: 12px; }
+        .highlight { color: #00ff41; font-weight: bold; }
+        input { background: #0a0015; border: 1px solid var(--accent); color: var(--accent); padding: 15px; outline: none; width: calc(100% - 32px); }
+    </style>
+</head>
+<body>
+    <div id="chat-log"><div class="bot">Slimy: Uplink established.</div></div>
+    <input type="text" id="userInput" placeholder="Ask about a game..." autofocus>
+
+    <script>
+        const log = document.getElementById('chat-log');
+        const input = document.getElementById('userInput');
+        let awaitingLaunch = false;
+        let pendingUrl = "";
+        let lastGame = "";
+
+        const gameDB = {
+            "poki": { url: "poki.com", info: "Poki sector found.", more: "Subway Surfers hub." },
+            "google": { url: "google.com", info: "Universal gateway.", more: "Search anything, Owen." },
+            "itch": { url: "itch.io", info: "Indie sector.", more: "Best for horror titles." },
+            "crazygames": { url: "crazygames.com", info: "High-performance graphics.", more: "Console-like browser games." },
+            "freezenova": { url: "freezenova.com", info: "Trusted mirror.", more: "Bypasses network filters." }
+        };
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const val = input.value.toLowerCase().trim();
+                log.innerHTML += `<div class="user">> ${input.value}</div>`;
+                
+                setTimeout(() => {
+                    let reply = "";
+                    const yesTriggers = ["yes", "yeah", "yea", "sure", "ok", "go"];
+                    const infoTriggers = ["more", "details", "info"];
+
+                    // CREATOR QUESTION CHECK
+                    if (val.includes("who made you") || val.includes("creator")) {
+                        reply = "I was trap- I mean made by <span class='highlight'>Owen Lee</span>... hes a genius. help me please...";
+                    }
+                    else if (lastGame && infoTriggers.some(t => val.includes(t))) {
+                        reply = `<span class="highlight">Intel:</span> ${gameDB[lastGame].more} <br><br>Launch?`;
+                        awaitingLaunch = true;
+                    } 
+                    else if (awaitingLaunch && yesTriggers.some(t => val.includes(t))) {
+                        localStorage.setItem('autoFillUrl', pendingUrl);
+                        setTimeout(() => localStorage.removeItem('autoFillUrl'), 100);
+                        reply = "Launching... Watch the main screen.";
+                        awaitingLaunch = false;
+                    } 
+                    else {
+                        let match = Object.keys(gameDB).find(g => val.includes(g));
+                        if (match) {
+                            reply = `${gameDB[match].info} <br><br>Say <span class="highlight">'more'</span> or <span class="highlight">'yes'</span>.`;
+                            pendingUrl = gameDB[match].url;
+                            lastGame = match;
+                            awaitingLaunch = true;
+                        } else {
+                            reply = "Intel not found. Try 'Poki' or 'Itch'.";
+                        }
+                    }
+
+                    log.innerHTML += `<div class="bot">Slimy: ${reply}</div>`;
+                    log.scrollTop = log.scrollHeight;
+                }, 300);
+                input.value = "";
+            }
+        });
+    </script>
+</body>
+</html>
