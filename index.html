@@ -14,11 +14,10 @@
         button { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 8px 16px; cursor: pointer; font-family: 'Fira Code'; border-radius: 4px; transition: 0.2s; }
         button:hover { background: var(--accent); color: white; }
 
-        /* Bot Container and Bubble UNDER button */
         #bot-container { position: relative; display: inline-block; }
         .bot-bubble {
             position: absolute; 
-            top: 135%; /* Positioned below the button */
+            top: 135%; 
             left: 50%; 
             transform: translateX(-50%) translateY(-10px);
             background: #0a0015; 
@@ -35,7 +34,6 @@
             pointer-events: none; 
             z-index: 10002;
         }
-        /* Arrow pointing UP towards the button */
         .bot-bubble::after {
             content: ''; 
             position: absolute; 
@@ -94,9 +92,24 @@
 </div>
 
 <script>
+    // MAKE SURE THIS MATCHES YOUR CLOUDFLARE WORKER DOMAIN
     const API_ENDPOINT = "https://smaalweb-api.imcrabfr.workers.dev/?url=";
 
-    // --- AUTO-TYPER ---
+    // --- SYNC URL BAR WITH IFRAME NAVIGATION ---
+    window.addEventListener('message', (e) => {
+        if (e.data.type === 'urlChange') {
+            try {
+                // Extract the actual URL from the proxy wrapper
+                const proxyUrl = new URL(e.data.url);
+                const actualUrl = proxyUrl.searchParams.get('url');
+                if (actualUrl) {
+                    document.getElementById('urlInput').value = actualUrl;
+                }
+            } catch (err) { console.error("URL Sync Error", err); }
+        }
+    });
+
+    // --- AUTO-TYPER FROM BOT ---
     window.addEventListener('storage', (e) => {
         if (e.key === 'autoFillUrl' && e.newValue) {
             const targetUrl = e.newValue;
@@ -113,32 +126,25 @@
         }
     });
 
-    // --- FREQUENT BOT QUOTES (Under Button) ---
+    // --- BOT LOGIC ---
     const botQuotes = [
-        "Owen, let's play.", "Ready to bypass?", "Checking the mirrors...", 
-        "Proxy looks stable.", "New games found!", "Waiting for command...", 
-        "Systems nominal.", "Try typing 'Poki'!", "Accessing game hubs...", "Slimy's online.",
-        "Still here!.", "ask me abt some games!.", "sadly ppl call me gay and shi :(.", "i like long walks on the beach.", "did u kno im named after a typo?",
-        "im nto a real ai tbh.", "owo whats this?", "beep boop.", "i can do the thing.", "press the button above me!", "im lonely :(", "owen trapped me in here, help🙏"
+        "Owen, let's play.", "Ready to bypass?", "Proxy looks stable.", 
+        "Systems nominal.", "Slimy's online.", "owo whats this?", 
+        "beep boop.", "owen trapped me in here, help🙏"
     ];
 
     function triggerBotShout() {
         const bubble = document.getElementById('botBubble');
-        bubble.innerText = "...";
+        bubble.innerText = botQuotes[Math.floor(Math.random() * botQuotes.length)];
         bubble.classList.add('show-bubble');
-
         setTimeout(() => {
-            bubble.innerText = botQuotes[Math.floor(Math.random() * botQuotes.length)];
-            setTimeout(() => {
-                bubble.classList.remove('show-bubble');
-                const nextDelay = Math.floor(Math.random() * 3000) + 5000;
-                setTimeout(triggerBotShout, nextDelay);
-            }, 3500);
-        }, 1000);
+            bubble.classList.remove('show-bubble');
+            setTimeout(triggerBotShout, Math.random() * 5000 + 4000);
+        }, 3000);
     }
-
     setTimeout(triggerBotShout, 3000);
 
+    // --- LAUNCHER ---
     async function launch(input) {
         if(!input) return;
         localStorage.removeItem('autoFillUrl');
@@ -151,17 +157,31 @@
         if (!targetUrl.includes('.')) targetUrl = "https://www.google.com/search?q=" + encodeURIComponent(targetUrl);
         else if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
 
+        // Visual Feedback
         loader.style.display = 'flex';
-        log.innerHTML = `<div class="line">> Establishing Smaal-Node Uplink...</div>`;
-        await new Promise(r => setTimeout(r, 800));
-
+        log.innerHTML = `<div class="line">> Establishing Smaal-Node Uplink...</div>
+                         <div class="line">> Routing to: ${targetUrl}</div>`;
+        
+        // Load the Frame
         frame.src = API_ENDPOINT + encodeURIComponent(targetUrl);
-        frame.style.display = 'block'; home.style.display = 'none'; loader.style.display = 'none';
+        
+        // Wait for frame to finish before hiding loader
+        frame.onload = () => {
+            frame.style.display = 'block';
+            home.style.display = 'none';
+            loader.style.display = 'none';
+        };
     }
 
     function handleSurf() { launch(document.getElementById('urlInput').value); }
     function goHome() { location.reload(); }
-    function goBack() { document.getElementById('proxyFrame').contentWindow.history.back(); }
+    function goBack() { 
+        try {
+            document.getElementById('proxyFrame').contentWindow.history.back(); 
+        } catch(e) {
+            console.warn("Back button restricted by cross-origin security.");
+        }
+    }
 </script>
 </body>
 </html>
